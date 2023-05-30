@@ -162,7 +162,7 @@ public class NativeServiceLoader<T> {
     /**
      * Return default extension, return <code>null</code> if it's not configured.
      */
-    public T getDefaultExtension() {
+    public T getDefaultNativeService() {
         getNativeServiceClasses();
         if (StringUtils.isBlank(cachedDefaultName)) {
             return null;
