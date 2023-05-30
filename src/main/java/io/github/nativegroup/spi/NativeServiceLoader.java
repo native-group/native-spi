@@ -160,6 +160,16 @@ public class NativeServiceLoader<T> {
     }
 
     /**
+     * Get the native service by specified name if found, or {@link #getDefaultNativeService() returns the default one}
+     *
+     * @param name the name of native service
+     * @return non-null
+     */
+    public T getOrDefaultNativeService(String name) {
+        return getNativeServiceClasses().containsKey(name) ? getNativeService(name) : getDefaultNativeService();
+    }
+
+    /**
      * Return default native service, return <code>null</code> if it's not configured.
      */
     public T getDefaultNativeService() {
@@ -220,10 +230,7 @@ public class NativeServiceLoader<T> {
             String value = defaultAnnotation.value();
             if ((value = value.trim()).length() > 0) {
                 String[] names = NAME_SEPARATOR.split(value);
-                if (names.length > 1) {
-                    throw new IllegalStateException("more than 1 default native service name on native service " + type.getName()
-                            + ": " + Arrays.toString(names));
-                }
+                Preconditions.checkState(names.length <= 1, "more than 1 default native service name on native service " + type.getName() + ": " + Arrays.toString(names));
                 if (names.length == 1) cachedDefaultName = names[0];
             }
         }
