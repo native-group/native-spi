@@ -27,12 +27,14 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Pattern;
 
 /**
  * native services loader.
@@ -47,6 +49,8 @@ public class NativeServiceLoader<T> {
 
     private static final String NATIVE_SERVICES_DIRECTORY = "META-INF/native-services/";
 
+    private static final Pattern NAME_SEPARATOR = Pattern.compile("\\s*[,]+\\s*");
+
     private static final ConcurrentMap<Class<?>, NativeServiceLoader<?>> NATIVE_SERVICE_LOADERS = Maps.newConcurrentMap();
 
     private static final ConcurrentMap<Class<?>, Object> NATIVE_SERVICE_INSTANCES = Maps.newConcurrentMap();
@@ -56,6 +60,8 @@ public class NativeServiceLoader<T> {
     private final ConcurrentMap<String, Holder<Object>> cachedInstances = Maps.newConcurrentMap();
 
     private final Holder<Map<String, Class<?>>> cachedClasses = new Holder<>();
+
+    private String cachedDefaultName;
 
     public NativeServiceLoader(Class<?> type) {
         this.type = type;
@@ -154,6 +160,17 @@ public class NativeServiceLoader<T> {
     }
 
     /**
+     * Return default extension, return <code>null</code> if it's not configured.
+     */
+    public T getDefaultExtension() {
+        getNativeServiceClasses();
+        if (StringUtils.isBlank(cachedDefaultName)) {
+            return null;
+        }
+        return getNativeService(cachedDefaultName);
+    }
+
+    /**
      * create native service instance by name
      *
      * @param name native service name
@@ -198,6 +215,18 @@ public class NativeServiceLoader<T> {
     }
 
     private Map<String, Class<?>> loadNativeServiceClasses() {
+        final SPI defaultAnnotation = type.getAnnotation(SPI.class);
+        if (defaultAnnotation != null) {
+            String value = defaultAnnotation.value();
+            if ((value = value.trim()).length() > 0) {
+                String[] names = NAME_SEPARATOR.split(value);
+                if (names.length > 1) {
+                    throw new IllegalStateException("more than 1 default native service name on native service " + type.getName()
+                            + ": " + Arrays.toString(names));
+                }
+                if (names.length == 1) cachedDefaultName = names[0];
+            }
+        }
         Map<String, Class<?>> nativeServiceClasses = Maps.newHashMap();
         loadDirectory(nativeServiceClasses);
         return nativeServiceClasses;

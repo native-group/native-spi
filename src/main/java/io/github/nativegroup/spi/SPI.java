@@ -32,4 +32,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface SPI {
+
+    /**
+     * default native service name
+     */
+    String value() default "";
 }
