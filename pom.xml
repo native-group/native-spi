@@ -6,7 +6,7 @@
 
     <groupId>io.github.native-group</groupId>
     <artifactId>native-spi</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
 
     <name>native-spi</name>
     <description>A lightweight Java SPI implementation, referring to Apache Dubbo SPI.</description>
