@@ -160,7 +160,7 @@ public class NativeServiceLoader<T> {
     }
 
     /**
-     * Return default extension, return <code>null</code> if it's not configured.
+     * Return default native service, return <code>null</code> if it's not configured.
      */
     public T getDefaultNativeService() {
         getNativeServiceClasses();
